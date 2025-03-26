@@ -5,3 +5,6 @@
 .classpath
 .DS_Store
 .project
+
+#Roba di intellij
+.idea
