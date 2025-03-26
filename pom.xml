@@ -1,0 +1,122 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>it.aspix</groupId>
+  <artifactId>tabparser</artifactId>
+  <version>2.0.0-SNAPSHOT</version>
+  <packaging>jar</packaging>
+
+  <name>tabParser</name>
+  <url>http://www.anarchive.it</url>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+
+  <dependencies>
+        <!-- INIZIO dipendenze generali archiver -->
+        <dependency>
+            <groupId>it.aspix</groupId>
+            <artifactId>simpleBotanicalData</artifactId>
+            <version>[6.2,)</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>commons-codec</groupId>
+            <artifactId>commons-codec</artifactId>
+            <version>1.10</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>4.5.10</version>
+            <scope>compile</scope>
+        </dependency>
+        <!-- FINE dipendenze generali archiver -->
+        
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi-ooxml</artifactId>
+            <version>4.1.1</version>
+            <scope>compile</scope>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.apache.odftoolkit</groupId>
+            <artifactId>simple-odf</artifactId>
+            <version>0.8.2-incubating</version>
+            <exclusions>
+                <exclusion> <!-- ?? forse un bug nelle dipendenze di simple-odf ? -->
+                    <groupId>com.sun</groupId>
+                    <artifactId>tools</artifactId>
+                </exclusion>
+                <exclusion> <!-- ?? forse un bug nelle dipendenze di simple-odf ? -->
+                    <groupId>xml-apis</groupId>
+                    <artifactId>xml-apis</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>    
+         
+        
+        <!-- 
+        le due dipendenze sotto non riesco a spostarle sul repository di maven perché c'è soltanto una beta
+        /opt/maven/bin/mvn install:install-file -Dfile=simple-odf-0.8.1-incubating.jar -DgroupId=simple-odf -DartifactId=simple-odf -Dversion=0.8.1 -Dpackaging=jar -DgeneratedPom=true
+        /opt/maven/bin/mvn install:install-file -Dfile=odfdom-java-0.8.10-incubating.jar -DgroupId=odfdom -DartifactId=odfdom -Dversion=0.8.1 -Dpackaging=jar -DgeneratedPom=true 
+        -->
+        <!-- 
+        <dependency>
+            <groupId>simple-odf</groupId>
+            <artifactId>simple-odf</artifactId>
+            <version>0.8.1</version>
+        </dependency>    
+        <dependency>
+            <groupId>odfdom</groupId>
+            <artifactId>odfdom</artifactId>
+            <version>0.8.1</version>
+        </dependency>
+         -->       
+  </dependencies>
+  
+
+  
+  <build>
+        <finalName>anArchive</finalName>
+        <plugins>
+        
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.8.0</version>
+                <configuration>
+                    <release>11</release> <!-- https://winterbe.com/posts/2018/08/29/migrate-maven-projects-to-java-11-jigsaw/ -->
+                    <source>11</source> <!-- https://maven.apache.org/plugins/maven-compiler-plugin/examples/set-compiler-source-and-target.html -->
+                    <target>11</target>
+                </configuration>
+            </plugin>
+            
+            
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>3.0.0</version>
+                <executions>
+                    <execution>
+                        <id>add-source</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>add-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <!-- FIXME: soluzione pessima, soltanto per rimettere in piedi il progetto -->
+                                <source>linkSrcArchiver</source>
+                            </sources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>
