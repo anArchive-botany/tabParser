@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright 2014 studio Aspix 
+ * Copyright 2014 studio Aspix
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -11,13 +11,9 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License. 
+ * limitations under the License.
  ***************************************************************************/
 package it.aspix.tabparser.inputassistito;
-
-import it.aspix.tabparser.tabella.ContenutoTabella;
-import it.aspix.tabparser.tabella.DatoTabella;
-import it.aspix.sbd.ValoreEnumeratoDescritto;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -32,6 +28,10 @@ import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+import it.aspix.sbd.introspection.ValoreEnumeratoDescritto;
+import it.aspix.tabparser.tabella.ContenutoTabella;
+import it.aspix.tabparser.tabella.DatoTabella;
+
 /****************************************************************************
  * Permette di inserire un valore scegliendolo in un lenco
  * l'elenco può essere recuperato da SimpleBotanicalData
@@ -39,12 +39,12 @@ import javax.swing.JPanel;
  * @author Edoardo Panfili, studio Aspix
  ***************************************************************************/
 public abstract class ProprietaDescrittaEditorCallback extends JDialog implements Editor{
-	
+
 	private static final long serialVersionUID = 1L;
 	DefaultComboBoxModel<ValoreEnumeratoDescritto> contenuto = new DefaultComboBoxModel<>();
 	JComboBox<ValoreEnumeratoDescritto> combo = new JComboBox<ValoreEnumeratoDescritto>(contenuto);
 	boolean chiusoConOK = true;
-	
+
 	public ProprietaDescrittaEditorCallback(){
 		String titolo = getTitolo();
 		ArrayList<ValoreEnumeratoDescritto> valori = getValori();
@@ -56,14 +56,14 @@ public abstract class ProprietaDescrittaEditorCallback extends JDialog implement
 		ok.addActionListener(e->{chiusoConOK=true;ProprietaDescrittaEditorCallback.this.setVisible(false);});
 		JButton annulla = new JButton("annulla");
 		annulla.addActionListener(e->{chiusoConOK=false;ProprietaDescrittaEditorCallback.this.setVisible(false);});
-		
+
 		JPanel pannello = new JPanel(new GridBagLayout());
-		
+
 		pannello.add(eValore, new GridBagConstraints(0,1,1,1,0.0,0.0,GridBagConstraints.WEST,GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
 		pannello.add(combo,   new GridBagConstraints(1,1,2,1,1.0,0.0,GridBagConstraints.WEST,GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 0), 0, 0));
 		pannello.add(annulla, new GridBagConstraints(1,2,1,1,1.0,0.0,GridBagConstraints.WEST,GridBagConstraints.HORIZONTAL, new Insets(10, 0, 0, 0), 0, 0));
 		pannello.add(ok,      new GridBagConstraints(2,2,1,1,1.0,0.0,GridBagConstraints.WEST,GridBagConstraints.HORIZONTAL, new Insets(10, 0, 0, 0), 0, 0));
-				
+
 		this.add(pannello);
 		this.setModal(true);
 		this.setTitle(titolo);
@@ -71,7 +71,7 @@ public abstract class ProprietaDescrittaEditorCallback extends JDialog implement
 		this.pack();
 	}
 
-	
+
 	// interfaccia Editor (ma la dichiarano le subclassi)
 	@Override
 	public void setValore(ContenutoTabella ct, int riga, int colonna) {
@@ -85,7 +85,7 @@ public abstract class ProprietaDescrittaEditorCallback extends JDialog implement
 	 ***********************************************************************/
 	public DatoTabella getValore() {
 		if(chiusoConOK){
-			DatoTabella dato = new DatoTabella(((ValoreEnumeratoDescritto)(combo.getSelectedItem())).enumerato, 
+			DatoTabella dato = new DatoTabella(((ValoreEnumeratoDescritto)(combo.getSelectedItem())).enumerato,
 					((ValoreEnumeratoDescritto)(combo.getSelectedItem())).descrizione, null);
 			return dato;
 		}else{
@@ -97,14 +97,14 @@ public abstract class ProprietaDescrittaEditorCallback extends JDialog implement
 	public JDialog getDialogo() {
 		return this;
 	}
-	
+
 	@Override
 	public String getVoceMenu(){
 		return getTitolo();
 	}
-	
+
 	public abstract String getTitolo();
-	
+
 	public abstract ArrayList<ValoreEnumeratoDescritto> getValori();
 
 }

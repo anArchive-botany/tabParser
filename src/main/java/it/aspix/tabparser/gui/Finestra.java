@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright 2014 studio Aspix 
+ * Copyright 2014 studio Aspix
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -11,7 +11,7 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License. 
+ * limitations under the License.
  ***************************************************************************/
 package it.aspix.tabparser.gui;
 
@@ -32,8 +32,8 @@ import it.aspix.tabparser.tabella.TabellaComposta;
 import it.aspix.archiver.UtilitaGui;
 import it.aspix.archiver.dialoghi.ComunicazioneEccezione;
 import it.aspix.archiver.nucleo.Proprieta;
-import it.aspix.sbd.InformazioniTipiEnumerati;
-import it.aspix.sbd.ValoreEnumeratoDescritto;
+import it.aspix.sbd.introspection.InformazioniTipiEnumerati;
+import it.aspix.sbd.introspection.ValoreEnumeratoDescritto;
 import it.aspix.sbd.obj.Sample;
 import it.aspix.sbd.obj.SimpleBotanicalData;
 import it.aspix.sbd.obj.SurveyedSpecie;
@@ -101,13 +101,13 @@ import javax.swing.border.BevelBorder;
 
 /****************************************************************************
  * La finestra principale dell'applicazione
- * 
+ *
  * @author Edoardo Panfili, studio Aspix
  ***************************************************************************/
 public class Finestra extends JFrame implements GestoreMessaggi{
 
 	private static final long serialVersionUID = 1L;
-	
+
 	// true=modifica|false=non_modifica => colore da usare
 	private static HashMap<Boolean, Color>coloreBase = new HashMap<>();
 	private static HashMap<Boolean, Color>coloreEvidenziato = new HashMap<>();
@@ -115,14 +115,14 @@ public class Finestra extends JFrame implements GestoreMessaggi{
 	{
 		coloreBase.put(true, new Color(255,120,0) ); // modifica i dati
 		coloreBase.put(false, new Color(154,191,65) ); // NON modifica i dati
-		
+
 		coloreEvidenziato.put(true, new Color(255,24,0) ); // modifica i dati
 		coloreEvidenziato.put(false, new Color(71,176,24) ); // NON modifica i dati
-		
+
 		coloreIcona.put(true, new Color(77,3,17) ); // modifica i dati
 		coloreIcona.put(false, new Color(28,77,7) ); // NON modifica i dati
 	}
-	
+
 	// lo scroll sta qui perché serve di aggiongerci la tabelle in risposta ad alcuni eventi
 	// JScrollPane scrollTabella = new JScrollPane();
 	JPanel pannelloTabella = new JPanel(new BorderLayout());
@@ -144,12 +144,12 @@ public class Finestra extends JFrame implements GestoreMessaggi{
 	Stack<AzioneAnnullabile> pilaAnnulla = new Stack<>();
 	JLabel pulsanteAnnulla;
 	JComboBox<String> comboAiuti;
-	
+
 	JLabel coordinateSelezione = new JLabel();
-	
+
 	Point puntoPopup = new Point();
 	ArrayList<JLabel> daEvidenziare = new ArrayList<>();
-	
+
 	/************************************************************************
 	 * Crea la finestra e i contenuti dei combo
 	 ***********************************************************************/
@@ -186,7 +186,7 @@ public class Finestra extends JFrame implements GestoreMessaggi{
 		}
 		comboAiuti = new JComboBox<>(aiuti);
 		comboAiuti.addActionListener(e->selezionatoAiuto());
-		pannelloPulsanti.add( comboAiuti );		
+		pannelloPulsanti.add( comboAiuti );
 		// seconda riga
 		pannelloPulsanti.add( jButtonDueRighe("autocorrezione","abbondanze", true, false, e->azionePatchAbbondanze()) );
 		pannelloPulsanti.add( jButtonDueRighe("trasforma","coordinate", true, false, e->azioneCalcolaCoordinate()) );
@@ -197,7 +197,7 @@ public class Finestra extends JFrame implements GestoreMessaggi{
 		pannelloPulsanti.add( new JLabel() );
 		// terza riga
 		pannelloPulsanti.add( jButtonDueRighe("copia", "verso destra", true, false, e->azioneCopiaDestra()) );
-		pannelloPulsanti.add( jButtonDueRighe("copia", "verso il basso", true, false, e->azioneCopiaBasso()) );		
+		pannelloPulsanti.add( jButtonDueRighe("copia", "verso il basso", true, false, e->azioneCopiaBasso()) );
 		pannelloPulsanti.add( jButtonDueRighe("inserisci","riga", true, false, e->azioneInserisciRiga()) );
 		pannelloPulsanti.add( jButtonDueRighe("inserisci","colonna", true, false, e->azioneInserisciColonna()) );
 		pannelloPulsanti.add( jButtonDueRighe("elimina","riga", true, false, e->azioneEliminaRiga()) );
@@ -211,21 +211,21 @@ public class Finestra extends JFrame implements GestoreMessaggi{
 		pannelloPulsanti.add( jButtonDueRighe("inserisci", "diritti", true, true, e->azioneAggiungiDiritti()) );
 		pannelloPulsanti.add( jButtonDueRighe("pulisci", "colori", false, false, e->azionePulisciColori()) );
 		pannelloPulsanti.add( new JLabel() );
-		
+
 		inviaAlServer.setBackground(Color.WHITE);
-		
+
 		JButton pulisciMessaggi = new JButton("pulisci");
 		pulisciMessaggi.addActionListener(e->azionePulisciMessaggi());
-		
+
 		// ============== riempio le caselle con i modelli ==================
-		ArrayList<ValoreEnumeratoDescritto> valoriStratificazione = InformazioniTipiEnumerati.getElementiDescritti("modelOfTheLevels","it");
+		ArrayList<ValoreEnumeratoDescritto> valoriStratificazione = InformazioniTipiEnumerati.getValoriDescritti("Cell.ModelOfTheLevels","it");
 		modelloStratificazione = new DefaultComboBoxModel<>();
 		for(int i=0; i<valoriStratificazione.size(); i++){
 			modelloStratificazione.addElement(valoriStratificazione.get(i));
 		}
 		stratificazione = new WiderDropDownCombo<ValoreEnumeratoDescritto>(modelloStratificazione);
 		stratificazione.setWide(true);
-		ArrayList<ValoreEnumeratoDescritto> valoriScalaAbbondanze = InformazioniTipiEnumerati.getElementiDescritti("abundanceScale","it");
+		ArrayList<ValoreEnumeratoDescritto> valoriScalaAbbondanze = InformazioniTipiEnumerati.getValoriDescritti("Cell.AbundanceScale","it");
 		modelloScalaAbbondanze = new DefaultComboBoxModel<>();
 		for(int i=0; i<valoriScalaAbbondanze.size(); i++){
 			modelloScalaAbbondanze.addElement(valoriScalaAbbondanze.get(i));
@@ -275,7 +275,7 @@ public class Finestra extends JFrame implements GestoreMessaggi{
 		statusBar.add(coordinateSelezione,       new GridBagConstraints(1,0,1,1,0.0,0.0,GridBagConstraints.WEST,GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 100, 0));
 		statusBar.add(new JPanel(),              new GridBagConstraints(2,0,1,1,1.0,0.0,GridBagConstraints.WEST,GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 100, 0));
 		statusBar.setBorder(BorderFactory.createBevelBorder( BevelBorder.LOWERED ));
-		
+
 		// =========== costruisco il pannello principale ====================
 		pannelloTabella.add(tabella, BorderLayout.CENTER);
 		JScrollPane scrollListaMessaggi = new JScrollPane();
@@ -293,7 +293,7 @@ public class Finestra extends JFrame implements GestoreMessaggi{
 		JPanel principale = new JPanel(new BorderLayout());
 		principale.add(pannelloAzioni, BorderLayout.NORTH);
 		principale.add(pannelloElaborazione, BorderLayout.CENTER);
-		
+
 		// ============== impostazioni della lista dei messaggi =============
 		contenutoListaMessaggi = new DefaultListModel<>();
 		listaMessaggi = new JList<>(contenutoListaMessaggi);
@@ -317,7 +317,7 @@ public class Finestra extends JFrame implements GestoreMessaggi{
 			}
 		});
 		listaMessaggi.setCellRenderer(new MessaggioErroreRenderer());
-		
+
 		// =================== impostazioni generali della finestra =========
 		ToolTipManager.sharedInstance().setInitialDelay(100);
 		this.setTitle(TabParser.NOME_PROGRAMMA);
@@ -329,7 +329,7 @@ public class Finestra extends JFrame implements GestoreMessaggi{
 		this.getContentPane().add(principale);
 		this.setDefaultCloseOperation(EXIT_ON_CLOSE);
 		aggiornaAnnulla();
-		
+
 		// ====================== menu pop-up delle caselle =================
 		JPopupMenu menu = new JPopupMenu();
 		for(String x: EditorFactory.getNomi()){
@@ -357,13 +357,13 @@ public class Finestra extends JFrame implements GestoreMessaggi{
                 	selezionaCasella(e);
                     // registro il punto in cui si è aperto il popup per aprire poi il dialogo
                     puntoPopup.x=e.getXOnScreen();
-                    puntoPopup.y=e.getYOnScreen();                    
+                    puntoPopup.y=e.getYOnScreen();
                     menu.show(e.getComponent(), e.getX(), e.getY());
                 }
 			}
 			@Override
             public void mousePressed(MouseEvent e){
-                gestisci(e); 
+                gestisci(e);
             }
 			@Override
             public void mouseReleased(MouseEvent e){
@@ -377,13 +377,13 @@ public class Finestra extends JFrame implements GestoreMessaggi{
 					DatoTabella dt = contenutoTabella.getValore(tabella.getRigaSelezionata(),tabella.getColonnaSelezionata());
 					if(dt.dato instanceof SurveyedSpecie){
 	                    puntoPopup.x=e.getXOnScreen();
-	                    puntoPopup.y=e.getYOnScreen();  
+	                    puntoPopup.y=e.getYOnScreen();
 						apriEditor("specie rilevata", puntoPopup);
 					}
 				}
 			}
         };
-        
+
         tabella.tabellaDati.addMouseListener(ascoltatoreMouseSuTabella);
         tabella.tabellaDati.addKeyListener(new KeyAdapter() {
 			@Override
@@ -393,7 +393,7 @@ public class Finestra extends JFrame implements GestoreMessaggi{
 		});
 		// ============================ DnD =================================
 		DropTargetListener dtl = new DropTargetAdapter() {
-						
+
 			@Override
 			public void drop(DropTargetDropEvent e) {
 				File file;
@@ -414,7 +414,7 @@ public class Finestra extends JFrame implements GestoreMessaggi{
 									if(evt.getPropertyName().equals("completato")){
 					                	Finestra.this.setTitle(TabParser.NOME_PROGRAMMA+" - "+nomeFile);
 					                	contenutoListaMessaggi.removeAllElements();
-					            		contenutoTabella = swc.contenutoTabella;		            		
+					            		contenutoTabella = swc.contenutoTabella;
 					            		String nomeScala = swc.nomeScala;
 					            		for(int i=0; i<modelloScalaAbbondanze.getSize(); i++){
 					            			if(modelloScalaAbbondanze.getElementAt(i).enumerato.equals(nomeScala)){
@@ -444,21 +444,21 @@ public class Finestra extends JFrame implements GestoreMessaggi{
 		            }
 		        }catch(Exception | Error err) {
 		        	ComunicazioneEccezione ce = new ComunicazioneEccezione(err);
-                	ce.setVisible(true); 
+                	ce.setVisible(true);
 		        }
 			}
 		};
 		new DropTarget(this, DnDConstants.ACTION_COPY_OR_MOVE, dtl );
 	}
-	
+
 	/************************************************************************
-	 * Apre un particolare editor 
+	 * Apre un particolare editor
 	 * @param nome dell'editor da aprire definiti in it.aspix.gui.inputassistito
 	 * @param punto in cui risiede il dato da editare
 	 ***********************************************************************/
 	private void apriEditor(String nome, Point punto){
 		Editor editor = EditorFactory.getEditor(nome);
-		editor.setValore(contenutoTabella, tabella.getRigaSelezionata(), tabella.getColonnaSelezionata()); 
+		editor.setValore(contenutoTabella, tabella.getRigaSelezionata(), tabella.getColonnaSelezionata());
 		editor.getDialogo().setLocation(punto.x, punto.y);
 		editor.setValore(contenutoTabella, tabella.getRigaSelezionata(), tabella.getColonnaSelezionata());
 		editor.getDialogo().setVisible(true);
@@ -467,7 +467,7 @@ public class Finestra extends JFrame implements GestoreMessaggi{
 			tabella.updateUI();
 		}
 	}
-	
+
 	/************************************************************************
 	 * Salva i dati in formato ods, mettendo un suffisso al nome del file
 	 * originale (se il suffisso non è già presente)
@@ -493,7 +493,7 @@ public class Finestra extends JFrame implements GestoreMessaggi{
 		grigio.setVisible(true);
     	sws.execute();
 	}
-	
+
 	/************************************************************************
 	 * Aggiunge una riga alla tabella alla posisione in cui si trova
 	 * quella attualmente selezionata
@@ -502,7 +502,7 @@ public class Finestra extends JFrame implements GestoreMessaggi{
 		contenutoTabella.addRow(tabella.getRigaSelezionata());
 		aggiornaTabella(contenutoTabella);
 	}
-	
+
 	/************************************************************************
 	 * Aggiunge una colonna alla tabella alla posisione in cui si trova
 	 * quella attualmente selezionata
@@ -511,7 +511,7 @@ public class Finestra extends JFrame implements GestoreMessaggi{
 		contenutoTabella.addColumn(tabella.getColonnaSelezionata());
 		aggiornaTabella(contenutoTabella);
 	}
-	
+
 	/************************************************************************
 	 * elimina la riga dealla tabella alla posisione in cui si trova
 	 * quella attualmente selezionata
@@ -520,7 +520,7 @@ public class Finestra extends JFrame implements GestoreMessaggi{
 		contenutoTabella.deleteRow(tabella.getRigaSelezionata());
 		aggiornaTabella(contenutoTabella);
 	}
-	
+
 	/************************************************************************
 	 * Copia in tutte le caselle a destra di quella selezionata il valore
 	 * presente in quella selezionata
@@ -548,7 +548,7 @@ public class Finestra extends JFrame implements GestoreMessaggi{
 		}
 		tabella.updateUI();
 	}
-	
+
 	/************************************************************************
 	 * Controlla le abbondanze presenti nella tabella
 	 ***********************************************************************/
@@ -557,7 +557,7 @@ public class Finestra extends JFrame implements GestoreMessaggi{
 		ControllerTabella.checkAbbondanze(contenutoTabella, ved.enumerato, this);
 		tabella.updateUI();
 	}
-	
+
 	/************************************************************************
 	 * corregge piccoli errori che possono trovarsi nelle abbondanze
 	 ***********************************************************************/
@@ -565,7 +565,7 @@ public class Finestra extends JFrame implements GestoreMessaggi{
 		ControllerTabella.autopatchAbbondanze(contenutoTabella);
 		tabella.updateUI();
 	}
-	
+
 	/************************************************************************
 	 * La selezione di un messaggio nella lista degli errori
 	 ***********************************************************************/
@@ -573,14 +573,14 @@ public class Finestra extends JFrame implements GestoreMessaggi{
 		MessaggioErrore me = listaMessaggi.getSelectedValue();
 		tabella.setCellaSelezionata(me.riga, me.colonna);
 	}
-	
+
 	/************************************************************************
 	 * Rimozione di tutti i messaggi di errore
 	 ***********************************************************************/
 	private void azionePulisciMessaggi(){
 		contenutoListaMessaggi.removeAllElements();
 	}
-	
+
 	/************************************************************************
 	 * Il controllo delle specie richiede tempo perché viene fatto dal server
 	 * per questo motivo si usa uno SwingWorker e il lavoro viene diviso in due parti:
@@ -595,7 +595,7 @@ public class Finestra extends JFrame implements GestoreMessaggi{
 			SimpleBotanicalData[] risposta;
 			@Override
 			protected SimpleBotanicalData[] doInBackground() throws Exception {
-				risposta = ControllerTabella.controllaSpecieRichiesta(contenutoTabella); 
+				risposta = ControllerTabella.controllaSpecieRichiesta(contenutoTabella);
 				return risposta;
 			}
 			@Override
@@ -604,13 +604,13 @@ public class Finestra extends JFrame implements GestoreMessaggi{
 				tabella.updateUI();
 				grigio.setVisible(false);
 			}
-			
+
 		};
 		lavoratore.execute();
 		this.setGlassPane(grigio); // mostra messaggio di attesa
 		grigio.setVisible(true);
 	}
-	
+
 	/************************************************************************
 	 * visualizza il rilievo presente nella colonna selezionata
 	 ***********************************************************************/
@@ -618,7 +618,7 @@ public class Finestra extends JFrame implements GestoreMessaggi{
 		int colonna = tabella.getColonnaSelezionata();
 		ValoreEnumeratoDescritto s = (ValoreEnumeratoDescritto) stratificazione.getSelectedItem();
 		ValoreEnumeratoDescritto abbondanza = (ValoreEnumeratoDescritto) scalaAbbondanze.getSelectedItem();
-		ScalaSample scalaAbbondanze = GestoreScale.buildForName(abbondanza.enumerato);		
+		ScalaSample scalaAbbondanze = GestoreScale.buildForName(abbondanza.enumerato);
 		try{
 			Sample rilievo = ControllerTabella.getRilievo(contenutoTabella, colonna, s.enumerato, scalaAbbondanze);
 			DialogoIspezioneRilievo dialogo = new DialogoIspezioneRilievo(rilievo);
@@ -626,11 +626,11 @@ public class Finestra extends JFrame implements GestoreMessaggi{
 			dialogo.setVisible(true);
 		}catch(Exception ex){
 			ComunicazioneEccezione ce = new ComunicazioneEccezione(ex);
-        	ce.setVisible(true); 
+        	ce.setVisible(true);
 			contenutoListaMessaggi.addElement(new MessaggioErrore(-1, colonna, GeneratoreErrore.COTRUZIONE_RILIEVO, ex.getLocalizedMessage(), Level.SEVERE));
 		}
 	}
-	
+
 	/************************************************************************
 	 * Rimuove tutte le colorazioni delle caselle
 	 ***********************************************************************/
@@ -643,7 +643,7 @@ public class Finestra extends JFrame implements GestoreMessaggi{
 		}
 		tabella.updateUI();
 	}
-	
+
 	/************************************************************************
 	 * Annulla l'utima azione eseguita
 	 ***********************************************************************/
@@ -656,7 +656,7 @@ public class Finestra extends JFrame implements GestoreMessaggi{
 		tabella.updateUI();
 		aggiornaAnnulla();
 	}
-	
+
 	/************************************************************************
 	 * Cerca & sostituisci
 	 ***********************************************************************/
@@ -667,16 +667,16 @@ public class Finestra extends JFrame implements GestoreMessaggi{
 		System.out.println("Chiuso con ok:"+cs.isEsegui());
 		if(cs.isEsegui()){
 			pilaAnnulla.push(new AzioneAnnullabile("cerca e sostituisci", contenutoTabella.clone()));
-			ControllerTabella.cercaSostituisci(contenutoTabella, 
-					cs.getCerca(), 
-					cs.getSostituisci(), 
-					cs.getArea(), 
+			ControllerTabella.cercaSostituisci(contenutoTabella,
+					cs.getCerca(),
+					cs.getSostituisci(),
+					cs.getArea(),
 					cs.isParziale());
 			tabella.updateUI();
 			aggiornaAnnulla();
 		}
 	}
-	
+
 	/************************************************************************
 	 * Calcola le coordinate WGS84 partendo da altri datum
 	 ***********************************************************************/
@@ -685,7 +685,7 @@ public class Finestra extends JFrame implements GestoreMessaggi{
 		ControllerTabella.calcolaCoordinate(contenutoTabella, this);
 		aggiornaAnnulla();
 	}
-	
+
 	/************************************************************************
 	 * Porta i dati nel formato ISO 8601
 	 ***********************************************************************/
@@ -695,7 +695,7 @@ public class Finestra extends JFrame implements GestoreMessaggi{
 		tabella.updateUI();
 		aggiornaAnnulla();
 	}
-	
+
 	/************************************************************************
 	 * Inserisce le annotazioni nei nomi di specie
 	 ***********************************************************************/
@@ -704,9 +704,9 @@ public class Finestra extends JFrame implements GestoreMessaggi{
 		ControllerTabella.annotaSpecie(contenutoTabella, this);
 		aggiornaAnnulla();
 	}
-	
+
 	/************************************************************************
-	 * Permette di inserire i dati di progetto sfruttando i 
+	 * Permette di inserire i dati di progetto sfruttando i
 	 * suggerimenti del server
 	 ***********************************************************************/
 	private void azioneDatiProgetto(){
@@ -722,13 +722,13 @@ public class Finestra extends JFrame implements GestoreMessaggi{
 				ControllerTabella.aggiungiCampo(contenutoTabella, "DirectoryInfo.ContainerName", progetto);
 			} catch (Exception e) {
 				ComunicazioneEccezione ce = new ComunicazioneEccezione(e);
-	        	ce.setVisible(true); 
+	        	ce.setVisible(true);
 			}
 			aggiornaTabella(contenutoTabella);
 			aggiornaAnnulla();
 		}
 	}
-	
+
 	/************************************************************************
 	 * Permette di inserire i diritti di accesso
 	 ***********************************************************************/
@@ -740,15 +740,15 @@ public class Finestra extends JFrame implements GestoreMessaggi{
 			ControllerTabella.aggiungiCampo(contenutoTabella, "DirectoryInfo.ContainerWriteRights", Proprieta.recupera("umask.groupWrite"));
 			ControllerTabella.aggiungiCampo(contenutoTabella, "DirectoryInfo.ContainerReadRights", Proprieta.recupera("umask.groupRead"));
 			ControllerTabella.aggiungiCampo(contenutoTabella, "DirectoryInfo.OwnerWriteRights", Proprieta.recupera("umask.ownerWrite"));
-			ControllerTabella.aggiungiCampo(contenutoTabella, "DirectoryInfo.OwnerReadRights", Proprieta.recupera("umask.ownerRead"));			
+			ControllerTabella.aggiungiCampo(contenutoTabella, "DirectoryInfo.OwnerReadRights", Proprieta.recupera("umask.ownerRead"));
 		} catch (Exception e) {
 			ComunicazioneEccezione ce = new ComunicazioneEccezione(e);
-        	ce.setVisible(true); 
+        	ce.setVisible(true);
 		}
 		aggiornaTabella(contenutoTabella);
 		aggiornaAnnulla();
 	}
-	
+
 	/************************************************************************
 	 * L'invio dei rilievi richiede tempo perché viene fatto dal server
 	 * per questo motivo si usa uno SwingWorker e il lavoro viene diviso in due parti:
@@ -764,8 +764,8 @@ public class Finestra extends JFrame implements GestoreMessaggi{
 				ValoreEnumeratoDescritto s = (ValoreEnumeratoDescritto) stratificazione.getSelectedItem();
 				ValoreEnumeratoDescritto abbondanza = (ValoreEnumeratoDescritto) scalaAbbondanze.getSelectedItem();
 				ScalaSample scalaAbbondanze = GestoreScale.buildForName(abbondanza.enumerato);
-				
-				risposta = ControllerTabella.invioAlServerRichiesta(contenutoTabella, s.enumerato, scalaAbbondanze, simulazione); 
+
+				risposta = ControllerTabella.invioAlServerRichiesta(contenutoTabella, s.enumerato, scalaAbbondanze, simulazione);
 				return risposta;
 			}
 			@Override
@@ -774,34 +774,34 @@ public class Finestra extends JFrame implements GestoreMessaggi{
 				tabella.updateUI();
 				grigio.setVisible(false);
 			}
-			
+
 		};
 		lavoratore.execute();
 		this.setGlassPane(grigio); // mostra messaggio di attesa
 		grigio.setVisible(true);
 	}
-	
+
 	private void azioneCorreggiCoordinate(){
 		pilaAnnulla.push(new AzioneAnnullabile("converti coordinate", contenutoTabella.clone()));
 		ControllerTabella.correggiCoordinate(contenutoTabella, this);
 		tabella.updateUI();
 		aggiornaAnnulla();
 	}
-	
+
 	private void azioneConvertiEsposizione(){
 		pilaAnnulla.push(new AzioneAnnullabile("converti esposizione", contenutoTabella.clone()));
 		ControllerTabella.convertiEsposizione(contenutoTabella, this);
 		tabella.updateUI();
 		aggiornaAnnulla();
 	}
-	
+
 	private void azioneConvertiInclinazione(){
 		pilaAnnulla.push(new AzioneAnnullabile("converti esposizione", contenutoTabella.clone()));
 		ControllerTabella.convertiInclinazione(contenutoTabella, this);
 		tabella.updateUI();
 		aggiornaAnnulla();
 	}
-	
+
 	/************************************************************************
 	 * Mostra a schermo un pannello di aiuto
 	 ***********************************************************************/
@@ -826,7 +826,7 @@ public class Finestra extends JFrame implements GestoreMessaggi{
 		});
 		dialogo.setVisible(true);
 	}
-	
+
 	/************************************************************************
 	 * Imposta le dimensioni delle colonne a seconda del contenuto
 	 ***********************************************************************/
@@ -841,7 +841,7 @@ public class Finestra extends JFrame implements GestoreMessaggi{
 			}
 		}
 	}
-	
+
 	/************************************************************************
 	 * Costruisce un pulsante da applicare alla pulsantiera superiore,
 	 * è un pulsate con due righe di testo e un'icona.
@@ -854,9 +854,9 @@ public class Finestra extends JFrame implements GestoreMessaggi{
 	 * @return il pulsante costruito
 	 ***********************************************************************/
 	private JLabel jButtonDueRighe(String r1, String r2, boolean modificaDati, boolean todo, ActionListener al){
-		String testo; 
+		String testo;
 		JLabel jb = new JLabel();
-		
+
 		// apparenza
 		jb.setFont(new Font("Arial", Font.PLAIN, 12));
 		jb.setOpaque(true);
@@ -869,7 +869,7 @@ public class Finestra extends JFrame implements GestoreMessaggi{
 		String nomeFile = "icone/"+r1+(r2==null?"": " "+r2)+".png";
 		URL risorsa = Finestra.class.getResource(nomeFile);
 		if(risorsa!=null){
-			ImageIcon ii = doAlpha(new ImageIcon(risorsa), coloreIcona.get(modificaDati)); 
+			ImageIcon ii = doAlpha(new ImageIcon(risorsa), coloreIcona.get(modificaDati));
 			jb.setIcon(ii);
 		}
 		// imposto il testo in modo che vada a capo
@@ -878,7 +878,7 @@ public class Finestra extends JFrame implements GestoreMessaggi{
 		if(todo){
 			daEvidenziare.add(jb);
 		}
-		
+
 		if(al==null){
 			jb.setEnabled(false);
 		}else{
@@ -897,10 +897,10 @@ public class Finestra extends JFrame implements GestoreMessaggi{
 		}
 		return jb;
 	}
-	
+
 	/************************************************************************
 	 * @return un pannello da usare come GlassPane, intercetta il click
-	 * del mouse 
+	 * del mouse
 	 ***********************************************************************/
 	private static JPanel jAttesa(){
 		JPanel grigio = new JPanel(new BorderLayout()){
@@ -928,10 +928,10 @@ public class Finestra extends JFrame implements GestoreMessaggi{
 		attendi.setFont(attendi.getFont().deriveFont(25.00f));
 		attendi.setHorizontalAlignment(SwingConstants.CENTER);
 		grigio.add(attendi, BorderLayout.CENTER);
-		
+
 		return grigio;
 	}
-	
+
 
 	@Override
 	public void addMessaggio(MessaggioErrore me) {
@@ -946,12 +946,12 @@ public class Finestra extends JFrame implements GestoreMessaggi{
 				i--;
 			}
 		}
-		
+
 	}
-	
+
 	/************************************************************************
 	 * JTabel non aggiorna automaticamente l'interfaccia al variare del
-	 * numero di colonne, questo metodo crea una nuova tabella e la 
+	 * numero di colonne, questo metodo crea una nuova tabella e la
 	 * reinserisce nello scroll
 	 * @param ct
 	 ***********************************************************************/
@@ -971,7 +971,7 @@ public class Finestra extends JFrame implements GestoreMessaggi{
 			tabella.tabellaDati.addMouseListener(m);
 		}
 	}
-	
+
 	/************************************************************************
 	 * Aggiorna il pulsante "annulla" in base alle azioni presenti nella pila
 	 ***********************************************************************/
@@ -986,25 +986,25 @@ public class Finestra extends JFrame implements GestoreMessaggi{
 			pulsanteAnnulla.setText(testo);
 		}
 	}
-	
+
 	private static ImageIcon doAlpha(ImageIcon originale, Color colore){
 		int width = originale.getIconWidth();
 		int height = originale.getIconHeight();
 		BufferedImage alphaMask = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
 		Graphics2D gAlpha = (Graphics2D) alphaMask.getGraphics();
 		ImageIcon risposta;
-		
+
 		gAlpha.drawImage(originale.getImage(), 0, 0, null);
 	    int[] pixels = alphaMask.getRGB(0, 0, width, height, null, 0, width);
 	    int pos,alpha;
 	    int coloreInt = (colore.getRed()<<16) + (colore.getGreen()<<8) + (colore.getBlue());
-	    
+
 	    for(pos=0; pos<pixels.length; pos++){
 	    	// siccome l'immagine è in toni di griglio prendo l'ultimo byte;
 	    	alpha = pixels[pos] & 0x000000ff;
 			pixels[pos] = (alpha<<24) | coloreInt ;
 	    }
-		
+
 	    alphaMask.setRGB(0, 0, width, height, pixels, 0, width);
 		risposta = new ImageIcon(alphaMask);
 		return risposta;

@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright 2014 studio Aspix 
+ * Copyright 2014 studio Aspix
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -11,11 +11,12 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License. 
+ * limitations under the License.
  ***************************************************************************/
 package it.aspix.tabparser.tabella;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -25,24 +26,24 @@ import org.xml.sax.SAXException;
 import it.aspix.archiver.dialoghi.ComunicazioneEccezione;
 import it.aspix.archiver.nucleo.Stato;
 import it.aspix.sbd.introspection.DescribedPath;
-import it.aspix.sbd.introspection.PropertyFinder;
+import it.aspix.sbd.introspection.PropertyFinder2;
 import it.aspix.sbd.obj.AttributeInfo;
 import it.aspix.sbd.obj.Sample;
 import it.aspix.sbd.obj.SimpleBotanicalData;
 
 /****************************************************************************
  * Contiene i dati descrittivi di una riga
- * 
+ *
  * @author Edoardo Panfili, studio Aspix
  ***************************************************************************/
 public class HeaderRiga implements Cloneable{
-	
+
 	private String gruppo;
 	private String nome;
 	private String descrizione;
 	public DescribedPath describedPath;
-	
-	
+
+
 	public HeaderRiga(String gruppo, String nome, String descrizione) {
 		super();
 		this.gruppo = gruppo;
@@ -54,19 +55,19 @@ public class HeaderRiga implements Cloneable{
 		HeaderRiga hr = new HeaderRiga(gruppo, nome, descrizione);
 		return hr;
 	}
-	
+
 	public String toString(){
 		return descrizione;
 	}
-	
+
 	public static final String PREFISSO_NOME_SPECIALE = "SPE#";
 
 	public static final String GRUPPO_LAYER = "LAYERS";
 	private static final String SPECIALE_LAYER = PREFISSO_NOME_SPECIALE;  // non serve altro suffisso perché i dati degli strati stanno in un gruppo a se
-	
+
 	private static final String GRUPPO_ATTRIBUTO = "ATTRIBUTI";
 	private static final String SPECIALE_ATTRIBUTO = PREFISSO_NOME_SPECIALE; // non serve altro suffisso perché gli attributi estesi stanno in un gruppo a se
-	
+
 	private static final String SPECIALE_X = PREFISSO_NOME_SPECIALE+"X";
 	private static final String SPECIALE_Y = PREFISSO_NOME_SPECIALE+"Y";
 	private static final String SPECIALE_EPSG = PREFISSO_NOME_SPECIALE+"EPSG";
@@ -75,21 +76,21 @@ public class HeaderRiga implements Cloneable{
 	private static final String SPECIALE_ASSOCIAZIONE_TIPO = PREFISSO_NOME_SPECIALE+"TIPO";
 	private static final String SPECIALE_NOTE_SPECIE = PREFISSO_NOME_SPECIALE+"NOTE SPECIE";
 	private static final String SPECIALE_SPECIE = PREFISSO_NOME_SPECIALE+"SPECIE";
-	
+
 	private static final String GRUPPO_GENERALE = "Generale";
-	
+
 	public static final HeaderRiga NON_USARE = new HeaderRiga("Generale", "non usare", "non usare");
 	public static final HeaderRiga NOTE_SPECIE = new HeaderRiga("Generale",SPECIALE_NOTE_SPECIE,"note specie");
 	public static final HeaderRiga SPECIE = new HeaderRiga("Generale",SPECIALE_SPECIE,"specie");
 	public static final HeaderRiga CLASSIFICAZIONE_NOME = new HeaderRiga("Generale",SPECIALE_ASSOCIAZIONE_NOME,"classificazione");
 	public static final HeaderRiga CLASSIFICAZIONE_TYPUS = new HeaderRiga("Generale",SPECIALE_ASSOCIAZIONE_TYPUS,"typus");
 	public static final HeaderRiga CLASSIFICAZIONE_TIPO = new HeaderRiga("Generale",SPECIALE_ASSOCIAZIONE_TIPO,"tipo classificazione");
-	
+
 	public static final HeaderRiga EPSG = new HeaderRiga("Place",SPECIALE_EPSG,"codice EPSG (per conversione)");
 	public static final HeaderRiga X = new HeaderRiga("Place",SPECIALE_X,"X (da convertire)");
 	public static final HeaderRiga Y = new HeaderRiga("Place",SPECIALE_Y,"Y (da convertire)");
-	
-	
+
+
 	public static ArrayList<HeaderRiga> possibili = new ArrayList<>();
 	static{
 		possibili.add(NON_USARE);
@@ -111,12 +112,13 @@ public class HeaderRiga implements Cloneable{
 		daEvitare.add("ClassificazioneUtile.Name"); // FIXME: questo è pre via di un errore di sbd
 		daEvitare.add("ClassificazioneUtile.Type"); // queste proprietà risultano rw (e invece sono fittizie)
 		daEvitare.add("ClassificazioneUtile.Typus");
-		
+
 		try{
-			DescribedPath[] dp = PropertyFinder.getInjectedFieldList(Sample.class);
+			DescribedPath[] dp = PropertyFinder2.getFieldList(Sample.class);
 			for(int i=0; i<dp.length; i++){
-				if( !(dp[i].isReadable) || !(dp[i].isWritable) || daEvitare.contains(dp[i].getGetterPath()) || dp[i].detailLevel>1){
-					// System.out.println("escludo "+dp[i].getterPath+ "   onlySearch="+dp[i].onlySearch+"   isSettable="+dp[i].isSettable);
+				// XXX in fondo c'era un "|| dp[i].detailLevel>2" che non mi pare serva
+				if( !(dp[i].isReadable) || !(dp[i].isWritable) || daEvitare.contains(dp[i].getGetterPath()) ){
+					System.out.println("escludo "+dp[i]);
 					continue;
 				}
 				if(dp[i].getGetterPath().indexOf('.')!=-1){
@@ -126,26 +128,26 @@ public class HeaderRiga implements Cloneable{
 					proprietaGruppo = GRUPPO_GENERALE;
 					proprietaNome = dp[i].getGetterPath();
 				}
-				inCostruzione = new HeaderRiga(proprietaGruppo, proprietaNome, dp[i].getNome()); 
+				inCostruzione = new HeaderRiga(proprietaGruppo, proprietaNome, dp[i].getNome());
 				inCostruzione.describedPath = dp[i];
 				possibili.add(inCostruzione);
 			}
 			// integro le informazioni nelle classificazioni inserite staticamente
 			CLASSIFICAZIONE_TYPUS.describedPath = new DescribedPath();
-			CLASSIFICAZIONE_TYPUS.describedPath.tipoSBD = "ReleveeTypus";
+			CLASSIFICAZIONE_TYPUS.describedPath.tipoSBD = "Classification.Typus";
 			CLASSIFICAZIONE_TIPO.describedPath = new DescribedPath();
-			CLASSIFICAZIONE_TIPO.describedPath.tipoSBD = "ClassificationType";
+			CLASSIFICAZIONE_TIPO.describedPath.tipoSBD = "Classification.Type";
 			// inserisco staticamente alcune classificazioni
 			possibili.add( NOTE_SPECIE );
 			possibili.add( SPECIE );
 			possibili.add( CLASSIFICAZIONE_NOME );
 			possibili.add( CLASSIFICAZIONE_TYPUS );
 			possibili.add( CLASSIFICAZIONE_TIPO );
-			
+
 			possibili.add( EPSG );
 			possibili.add( X );
 			possibili.add( Y );
-			
+
 			// i dati per gli strati
 			// XXX: anche questi compaiono sparsi qui e in entwash, non sarebbe male averli in un unico punto, magari con le traduzioni
 			addSerieAttributiStrato("1", "alberi");
@@ -176,9 +178,9 @@ public class HeaderRiga implements Cloneable{
 
 		}catch(Exception ex){
 			ComunicazioneEccezione ce = new ComunicazioneEccezione(ex);
-        	ce.setVisible(true); 
+        	ce.setVisible(true);
 		}
-		
+
 		SimpleBotanicalData risposta;
 		try {
 			risposta = Stato.comunicatore.recuperaInformazioniAttributi();
@@ -187,21 +189,21 @@ public class HeaderRiga implements Cloneable{
 	        		possibili.add(new HeaderRiga(GRUPPO_ATTRIBUTO, SPECIALE_ATTRIBUTO+ai.getName(), ai.getName()));
 	        	}
 	        }
-		} catch (SAXException | IOException e) {
+		} catch (SAXException | IOException | InterruptedException | URISyntaxException e) {
 			ComunicazioneEccezione ce = new ComunicazioneEccezione(e);
-        	ce.setVisible(true); 
+        	ce.setVisible(true);
 		}
 	}
-	
+
 	private static void addSerieAttributiStrato(String numero, String descrizione){
 		possibili.add(new HeaderRiga(GRUPPO_LAYER, SPECIALE_LAYER+numero+"-coverage", descrizione+": copertura"));
 		possibili.add(new HeaderRiga(GRUPPO_LAYER, SPECIALE_LAYER+numero+"-height", descrizione+": altezza media"));
 		possibili.add(new HeaderRiga(GRUPPO_LAYER, SPECIALE_LAYER+numero+"-heightMin", descrizione+": altezza minima"));
 		possibili.add(new HeaderRiga(GRUPPO_LAYER, SPECIALE_LAYER+numero+"-heightMax", descrizione+": altezza massima"));
 	}
-	
 
-	
+
+
 	/************************************************************************
 	 * Cerca un elemento utilizzando il suo path
 	 * @param path
@@ -218,7 +220,7 @@ public class HeaderRiga implements Cloneable{
 			return cerca(gruppo, nome);
 		}
 	}
-	
+
 	/************************************************************************
 	 * nomeComune2Path contiene i nomi descrittivi sempre in tutto minuscolo
 	 * per facilitare il confronto
@@ -236,16 +238,15 @@ public class HeaderRiga implements Cloneable{
 			nomeComune2Path.put("note", cercaHeader("Note"));
 			nomeComune2Path.put("parole chiave", cercaHeader("Keywords"));
 			nomeComune2Path.put("nome provvisorio", cercaHeader("Community"));
-			
+
 			nomeComune2Path.put("classificazione", CLASSIFICAZIONE_NOME);
-			
-			// FIXME: commentate per evitare un errore
-			// nomeComune2Path.put("riferimento lisy", cercaHeader("PublicationRef.Reference"));
+
+			nomeComune2Path.put("riferimento lisy", cercaHeader("PublicationRef.Reference"));
 			nomeComune2Path.put("citazione", cercaHeader("PublicationRef.Citation"));
 			nomeComune2Path.put("numero tabella", cercaHeader("PublicationRef.Table"));
 			nomeComune2Path.put("numero rilievo nella tabella", cercaHeader("PublicationRef.Number"));
 			nomeComune2Path.put("numero del rilievo nella tabella", cercaHeader("PublicationRef.Number"));
-			
+
 			nomeComune2Path.put("località", cercaHeader("Place.Name"));
 			nomeComune2Path.put("comune", cercaHeader("Place.Town"));
 			nomeComune2Path.put("provincia", cercaHeader("Place.Province"));
@@ -258,10 +259,10 @@ public class HeaderRiga implements Cloneable{
 			nomeComune2Path.put("latitudine", cercaHeader("Place.Latitude"));
 			nomeComune2Path.put("longitudine", cercaHeader("Place.Longitude"));
 			nomeComune2Path.put("precisione del punto", cercaHeader("Place.PointPrecision"));
-			
+
 			nomeComune2Path.put("tipo dell'area protetta", cercaHeader("Place.ProtectedAreaType"));
 			nomeComune2Path.put("nome dell'area protetta", cercaHeader("Place.ProtectedAreaName"));
-			
+
 			nomeComune2Path.put("reticolo", cercaHeader("Place.MainGrid"));
 			nomeComune2Path.put("reticolo cartografico regionale", cercaHeader("Place.MainGrid"));
 			nomeComune2Path.put("altitudine", cercaHeader("Place.Elevation"));
@@ -269,25 +270,25 @@ public class HeaderRiga implements Cloneable{
 			nomeComune2Path.put("inclinazione", cercaHeader("Place.Inclination"));
 			nomeComune2Path.put("substrato", cercaHeader("Place.Substratum"));
 			nomeComune2Path.put("habitat", cercaHeader("Place.Habitat"));
-			
+
 			nomeComune2Path.put("copertura totale", cercaHeader("Cell.TotalCovering"));
 			nomeComune2Path.put("forma del rilievo", cercaHeader("Cell.ShapeName"));
 			nomeComune2Path.put("area", cercaHeader("Cell.ShapeArea"));
 			nomeComune2Path.put("dimensione 1", cercaHeader("Cell.ShapeDimension1"));
 			nomeComune2Path.put("dimensione 2", cercaHeader("Cell.ShapeDimension1"));
-			
+
 			// nomeComune2Path.put("", cercaHeader(""));
-			 
+
 				/*
 				 * Classificazione
 
 				 */
 		}catch(Exception e){
 			ComunicazioneEccezione ce = new ComunicazioneEccezione(e);
-        	ce.setVisible(true); 
+        	ce.setVisible(true);
 		}
 	}
-	
+
 	/************************************************************************
 	 * Cerca un elemento conoscendo il suo nome comune (i nomi normalmente
 	 * usati nelle tabelle excel)
@@ -298,22 +299,24 @@ public class HeaderRiga implements Cloneable{
 	public static HeaderRiga cercaPerNomeComune(String nome){
 		HeaderRiga trovato = nomeComune2Path.get(nome.toLowerCase());
 		return trovato;
-	}				
-	
+	}
+
 	public static HeaderRiga cerca(String gruppo, String nome) throws Exception{
 		for(HeaderRiga hr: possibili){
+			System.out.println(">>> "+gruppo+"."+nome+" -- "+hr.getGruppo()+"."+hr.getNome());
 			if(gruppo.equals(hr.getGruppo()) && nome.equals(hr.getNome())){
+				System.out.println("  TROVATO");
 				return hr;
 			}
 		}
 		throw new Exception("non trovo "+gruppo+"."+nome);
 	}
-	
+
 
 	public boolean isSpeciale(){
 		return nome.startsWith(PREFISSO_NOME_SPECIALE);
 	}
-	
+
 	public String getPath(){
 		if(gruppo.equals(GRUPPO_GENERALE)){
 			return nome;
@@ -333,7 +336,7 @@ public class HeaderRiga implements Cloneable{
 	public String getDescrizione() {
 		return descrizione;
 	}
-	
+
 	@Override
 	public boolean equals(Object o) {
 		if(o instanceof HeaderRiga){

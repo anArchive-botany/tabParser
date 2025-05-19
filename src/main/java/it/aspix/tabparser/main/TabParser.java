@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright 2014 studio Aspix 
+ * Copyright 2014 studio Aspix
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -11,7 +11,7 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License. 
+ * limitations under the License.
  ***************************************************************************/
 package it.aspix.tabparser.main;
 
@@ -25,20 +25,17 @@ import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
 
-import org.apache.log4j.BasicConfigurator;
-
 import it.aspix.archiver.Utilita;
 import it.aspix.archiver.UtilitaGui;
 import it.aspix.archiver.dialoghi.AperturaApplicazione;
 import it.aspix.archiver.nucleo.Comunicatore;
 import it.aspix.archiver.nucleo.Proprieta;
 import it.aspix.archiver.nucleo.Stato;
-import it.aspix.sbd.obj.SimpleBotanicalData;
 import it.aspix.tabparser.gui.Finestra;
 
 /****************************************************************************
- * Chiede le cradenziali e avvia l'applicazione 
- * 
+ * Chiede le cradenziali e avvia l'applicazione
+ *
  * @author Edoardo Panfili, studio Aspix
  ***************************************************************************/
 public class TabParser {
@@ -46,7 +43,7 @@ public class TabParser {
     public static ImageIcon splashTabParser = new ImageIcon(TabParser.class.getResource("splash.jpg"));
 	public static final String NOME_PROGRAMMA = "tabParser";
 	public static final String SUFFISSO_FILE = "-"+NOME_PROGRAMMA+".xls";
-	
+
 	public static void main(String[] args) throws IOException {
 		try {
 		    for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
@@ -58,23 +55,20 @@ public class TabParser {
 		} catch (Exception e) {
 		    // lasciamo quello di default
 		}
-		
+
 		System.setProperty("com.apple.mrj.application.apple.menu.about.name","TabParser");
         System.setProperty("apple.laf.useScreenMenuBar", "true");
-        BasicConfigurator.configure();
-       
+
 		if( System.getenv("DEBUG_ENV_NOME")!=null && System.getenv("DEBUG_ENV_PASSWORD")!=null ){
 			Proprieta.caricaProprieta();
 			Proprieta.aggiorna("connessione.nome", System.getenv("DEBUG_ENV_NOME"));
 			Proprieta.aggiorna("connessione.password", System.getenv("DEBUG_ENV_PASSWORD"));
-			Comunicatore comunicatore=new Comunicatore();
+			Comunicatore comunicatore=new Comunicatore("TabParser","dev");
 	        Stato.comunicatore = comunicatore;
-	        comunicatore.setSoftwareName("TabParser");
-	        comunicatore.setSoftwareVersion("dev");
 		}else{
 	        AperturaApplicazione attesaApertura = new AperturaApplicazione(
 	        		splashTabParser,
-	                "Versione ["+Stato.buildTimeStamp+"] http://www.anarchive.it", 
+	                "Versione ["+Stato.buildTimeStamp+"] http://www.anarchive.it",
 	                Color.WHITE,
 	                5
 	            );
@@ -87,17 +81,14 @@ public class TabParser {
             attesaApertura.chiediPassword();
             attesaApertura.aggiornaConnessione();
             Proprieta.check();
-            
-            
-            Comunicatore comunicatore=new Comunicatore();
+
+
+            Comunicatore comunicatore=new Comunicatore("TabParser", Stato.versioneTools);
             Stato.comunicatore = comunicatore;
-            comunicatore.setSoftwareName("TabImport");
-            comunicatore.setSoftwareVersion(Stato.versioneTools);
             // controllo i diritti di accesso
-            
+
             attesaApertura.setAvanzamento("Chiedo verifica diritti di accesso...",3);
-            SimpleBotanicalData r = new SimpleBotanicalData();
-         
+
             boolean esito;
             String messaggioErrore = "Utente non riconosciuto";
             try{
@@ -111,19 +102,19 @@ public class TabParser {
                 UtilitaGui.mostraMessaggioAndandoACapo(messaggioErrore, "errore", JOptionPane.ERROR_MESSAGE);
                 System.exit(0);
             }
-              
+
             // apre la finestra degli aggiornamenti (che si apre solo se serve)
             // XXX: in TabParser la finestra non la apro
             /* ComunicazioneAggiornamenti da = new ComunicazioneAggiornamenti(Stato.versione);
             da.setVisible(true); */
             //apre la finestra principale
             attesaApertura.setAvanzamento("Creo la finestra principale...",4);
-            
+
             attesaApertura.setAvanzamento("Avvio completato",5);
             attesaApertura.setVisible(false);
             attesaApertura.dispose();
-	            
-	            
+
+
 		}
 		// XXX: evito il log di tutti i messaggi
 		Proprieta.aggiorna("devel.sbdLogEnabled", "false");
@@ -131,7 +122,7 @@ public class TabParser {
 		UtilitaGui.centraDialogoAlloSchermo(cs, UtilitaGui.CENTRO);
 		cs.setVisible(true);
 	}
-	
+
 	public static String getHostName(){
 		String host = "unknown";
 		try {

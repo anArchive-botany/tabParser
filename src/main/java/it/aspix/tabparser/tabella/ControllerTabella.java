@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright 2014 studio Aspix 
+ * Copyright 2014 studio Aspix
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -11,7 +11,7 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License. 
+ * limitations under the License.
  ***************************************************************************/
 package it.aspix.tabparser.tabella;
 
@@ -42,6 +42,7 @@ import it.aspix.sbd.scale.sample.ScalaSample;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -52,13 +53,13 @@ import org.xml.sax.SAXException;
 
 /****************************************************************************
  * Esegue le operazioni su ContenutoTabella
- * 
+ *
  * @author Edoardo Panfili, studio Aspix
  ***************************************************************************/
 public class ControllerTabella {
-	
+
 	/************************************************************************
-	 * Una area di interesse per le operazioni eseguite 
+	 * Una area di interesse per le operazioni eseguite
 	 * @author Edoardo Panfili, studio Aspix
 	 ***********************************************************************/
 	public enum Area {
@@ -68,17 +69,17 @@ public class ControllerTabella {
 		STRATI("strati"),
 		CLASSIFICAZIONI("classificazioni"),
 		ABBONDANZE("abbondanze");
-		
+
 		private final String descrizione;
 		Area(String descrizione) {
 	        this.descrizione = descrizione;
 	    }
-		
+
 		public String toString(){
 			return descrizione;
 		}
 	}
-	
+
 	/************************************************************************
 	 * @param gnd il parametro da testare
 	 * @return true se il dato relativo non va utilizzato per costruire un rilievo
@@ -87,25 +88,25 @@ public class ControllerTabella {
 		return gnd.equals(HeaderRiga.NON_USARE) || gnd.equals(HeaderRiga.NOTE_SPECIE) ||
 				gnd.equals(HeaderRiga.X) || gnd.equals(HeaderRiga.Y) || gnd.equals(HeaderRiga.EPSG );
 	}
-	
+
 	/************************************************************************
 	 * @param contenuto tabella dei dati
 	 * @param iColonna la colonna in cui reperire i dati del rilievo
 	 * @param modelloStrati
 	 * @return il rilievo costruito
-	 * @throws ValoreException 
-	 * @throws InvocationTargetException 
-	 * @throws IllegalArgumentException 
-	 * @throws IllegalAccessException 
-	 * @throws SecurityException 
-	 * @throws NoSuchMethodException 
+	 * @throws ValoreException
+	 * @throws InvocationTargetException
+	 * @throws IllegalArgumentException
+	 * @throws IllegalAccessException
+	 * @throws SecurityException
+	 * @throws NoSuchMethodException
 	 ***********************************************************************/
 	public static Sample getRilievo(ContenutoTabella contenuto, int iColonna, String modelloStrati, ScalaSample ss) throws ValoreException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException{
 		Sample rilievo = CostruttoreOggetti.createSimpleSample(modelloStrati, ss.getNome());
 		HeaderRiga hr;
 		int iStrati = contenuto.getColonnaPerTipo(HeaderColonna.STRATI);
 		int iDefinizioni = contenuto.getColonnaPerTipo(HeaderColonna.DEFINIZIONI);
-		
+
 		for(int iRiga=0;iRiga<contenuto.headerRighe.length;iRiga++){
 			hr = contenuto.headerRighe[iRiga];
 			if( !isScartato(hr) ){
@@ -138,7 +139,7 @@ public class ControllerTabella {
 							c.setType(contenuto.dati[ indici[2] ][iColonna].toString());
 						}else{
 							c.setType("actual");
-						}						
+						}
 						rilievo.addClassification(c);
 					}else if(hr.equals(HeaderRiga.CLASSIFICAZIONE_TYPUS) || hr.equals(HeaderRiga.CLASSIFICAZIONE_TIPO)){
 						; // typus viene trattato con l'associazione
@@ -160,8 +161,8 @@ public class ControllerTabella {
 						default:
 							UtilitaGestioneErrori.mostraErrore("Attributo non gestito", "La riga "+(iRiga+1)+": "+hr.getDescrizione()+" verrà ignorata");
 						}
-						
-					}else{						
+
+					}else{
 						UtilitaGestioneErrori.mostraErrore("Attributo non gestito", "La riga "+(iRiga+1)+": "+hr.getDescrizione()+" verrà ignorata");
 					}
 				}else{
@@ -172,8 +173,8 @@ public class ControllerTabella {
 		CostruttoreOggetti.rimuoviLivelliVuoti(rilievo.getCell());
 		return rilievo;
 	}
-	
-	
+
+
 	/************************************************************************
 	 * La prima colonna sono le definizioni e poi tutti rilievi
 	 ***********************************************************************/
@@ -184,7 +185,7 @@ public class ControllerTabella {
 		}
 	}
 
-	
+
 	/************************************************************************
 	 * NB: questa analisi va fatta dopo aver marcato le colonne
 	 ***********************************************************************/
@@ -194,7 +195,7 @@ public class ControllerTabella {
 		int i;
 
 		iDefinizioni = contenuto.getColonnaPerTipo(HeaderColonna.DEFINIZIONI);
-		
+
 		// faccio il lavoro soltanto se c'è una colonna con le definizioni
 		if(iDefinizioni != -1){
 			for(i=0; i<contenuto.headerRighe.length && contenuto.dati[i][iDefinizioni].toString().length()>0; i++){
@@ -206,7 +207,7 @@ public class ControllerTabella {
 					boolean presente=false;
 					for(int col=iDefinizioni+1;col<contenuto.dati[i].length && !presente;col++){
 						if(contenuto.headerColonne[col].equals(HeaderColonna.RILIEVO)){
-							presente |= contenuto.dati[i][col].dato!=null && contenuto.dati[i][col].dato.toString().length()>0;  
+							presente |= contenuto.dati[i][col].dato!=null && contenuto.dati[i][col].dato.toString().length()>0;
 						}
 					}
 					if(presente){
@@ -224,12 +225,12 @@ public class ControllerTabella {
 			}
 		}
 	}
-	
-	
+
+
 	/************************************************************************
 	 * Considerando tutta l'area delle abbondanze suppone quale
 	 * scala sia in uso nella tabella
-	 * 
+	 *
 	 * @return la scala più probabile
 	 ***********************************************************************/
 	public static String supponiScalaAbbondanza(ContenutoTabella contenuto){
@@ -260,8 +261,8 @@ public class ControllerTabella {
 		}
 		return scale.get(0).scala.getNome();
 	}
-	
-	
+
+
 	/************************************************************************
 	 * @param nomeScala da applicare per il controllo
 	 * @param gm a cui comunicare i problemi
@@ -286,8 +287,8 @@ public class ControllerTabella {
 			}
 		}
 	}
-	
-	
+
+
 	/************************************************************************
 	 * Serve a correggere eventuali letture errate dell'ocr:
 	 * "t"→"+"; "l"→"1"
@@ -308,10 +309,10 @@ public class ControllerTabella {
 			}
 		}
 	}
-	
-	
+
+
 	/************************************************************************
-	 * Controlla i nomi di specie inviandoli al server, 
+	 * Controlla i nomi di specie inviandoli al server,
 	 * questa funzione è migliorabile, invia una lista completa
 	 * per ogni strato inserendo nomi "" nelle righe che non interessano
 	 * @param contenuto tabella dei dati
@@ -321,16 +322,16 @@ public class ControllerTabella {
 		String[] elenco;
 		int colonnaStrati = contenuto.getColonnaPerTipo(HeaderColonna.STRATI);
 		int iStrato;
-		
+
 		String nomiStrati[] = contenuto.getStrati();
 		SimpleBotanicalData rispostaServer[] = new SimpleBotanicalData[nomiStrati.length];
-		
+
 		for(iStrato=0; iStrato<nomiStrati.length ; iStrato++){
 			elenco = new String[contenuto.getNumeroRighe()+1];
-			elenco[0] = ""; // il server controlla le righe numerandole da zero, 
+			elenco[0] = ""; // il server controlla le righe numerandole da zero,
 			// per me la specie uno è la prima quindi uso questo workaround
 			for(int i=0;i<contenuto.dati.length; i++){
-				if(contenuto.headerRighe[i].equals(HeaderRiga.SPECIE) && 
+				if(contenuto.headerRighe[i].equals(HeaderRiga.SPECIE) &&
 						(colonnaStrati==-1 || contenuto.dati[i][colonnaStrati].dato.toString().equals(nomiStrati[iStrato])) ){
 					elenco[i+1] = contenuto.dati[i][colonna].toString();
 				}else{
@@ -339,14 +340,14 @@ public class ControllerTabella {
 			}
 			try {
 				rispostaServer[iStrato] = it.aspix.archiver.nucleo.Stato.comunicatore.controllaListaNomiSpecie(elenco);
-			} catch (SAXException | IOException e) {
+			} catch (SAXException | IOException | InterruptedException | URISyntaxException e) {
 				ComunicazioneEccezione ce = new ComunicazioneEccezione(e);
 	        	ce.setVisible(true);
 			}
 		}
 		return rispostaServer;
 	}
-	
+
 	/************************************************************************
 	 * Controlla i nomi di specie inviandoli al server
 	 * @param contenuto tabella dei dati
@@ -360,35 +361,35 @@ public class ControllerTabella {
 		int colonnaStrati = contenuto.getColonnaPerTipo(HeaderColonna.STRATI);
 		String nomiStrati[] = contenuto.getStrati();
 		int iStrato;
-		
+
 		ErrorLevelManager managerLivelli = new ErrorLevelManager();
 		managerLivelli.associaCodiceLivello("1011", Level.WARNING);
 		managerLivelli.associaCodiceLivello("2032", Level.FINE);
 		gm.rimuoviSelettivo(GeneratoreErrore.CONTROLLO_SPECIE);
-		
+
 		for(iStrato=0; iStrato<nomiStrati.length ; iStrato++){
 			for(int i=0;i<contenuto.dati.length; i++){
-				if(contenuto.headerRighe[i].equals(HeaderRiga.SPECIE) && 
+				if(contenuto.headerRighe[i].equals(HeaderRiga.SPECIE) &&
 						(colonnaStrati==-1 || contenuto.dati[i][colonnaStrati].dato.toString().equals(nomiStrati[iStrato])) ){
 					sp = rispostaServer[iStrato].getSpecieSpecification(i+1);
 					d = new DatoTabella();
 					if(sp.getNome()!=null && !sp.getNome().equals("null")){
 						d.livello = managerLivelli.calcolaLivelloMassimo(sp.getMessage());
-						
+
 						d.dato = CostruttoreOggetti.createSurveyedSpecie(sp.getNome(), true, "sure") ;
 						if(contenuto.dati[i][colonna].toString().equals(d.dato.toString())){
 							d.tip = managerLivelli.cercaTestoMassimo(sp.getMessage());
 						}else{
 							d.tip = "era: "+contenuto.dati[i][colonna].toString();
 						}
-						
+
 						contenuto.dati[i][colonna] = d;
 						for(int j=0; j<sp.getMessageSize(); j++){
 							gm.addMessaggio(new MessaggioErrore(
-									i, 
-									colonna, 
-									GeneratoreErrore.CONTROLLO_SPECIE, 
-									sp.getMessage(j).toString(), 
+									i,
+									colonna,
+									GeneratoreErrore.CONTROLLO_SPECIE,
+									sp.getMessage(j).toString(),
 									managerLivelli.calcolaLivelloMessaggio(sp.getMessage(j))
 							));
 						}
@@ -396,10 +397,10 @@ public class ControllerTabella {
 						// il server non ha identificato il nome
 						contenuto.dati[i][colonna].livello = Level.SEVERE;
 						gm.addMessaggio(new MessaggioErrore(
-								i, 
-								colonna, 
-								GeneratoreErrore.CONTROLLO_SPECIE, 
-								"Nome di specie non identificabile", 
+								i,
+								colonna,
+								GeneratoreErrore.CONTROLLO_SPECIE,
+								"Nome di specie non identificabile",
 								Level.SEVERE
 						));
 					}
@@ -407,10 +408,10 @@ public class ControllerTabella {
 			}
 		}
 	}
-	
+
 	public static void cercaSostituisci(ContenutoTabella contenuto, String cerca, String sostituisci, Area areaRichiesta, boolean parziale){
 		int iRiga, iColonna;
-		HeaderRiga hr; 
+		HeaderRiga hr;
 		HeaderColonna hc;
 		int tipoRiga;
 		boolean sostituzioneApplicabile;
@@ -429,7 +430,7 @@ public class ControllerTabella {
 				tipoRiga = 3; // headers
 			}
 			for(iColonna=0; iColonna< contenuto.dati[0].length; iColonna++){
-				hc = contenuto.headerColonne[iColonna]; 
+				hc = contenuto.headerColonne[iColonna];
 				sostituzioneApplicabile = false;
 				switch(areaRichiesta){
 				case ABBONDANZE:
@@ -469,16 +470,16 @@ public class ControllerTabella {
 			}
 		}
 	}
-	
+
 	public static void calcolaCoordinate(ContenutoTabella contenuto, GestoreMessaggi gm){
 		int indiceEpsg = -1;
 		int indiceX = -1;
 		int indiceY = -1;
 		int indiceLatitudine = -1;
 		int indiceLongitudine = -1;
-		
+
 		boolean errori = false;
-		
+
 		for(int i=0; i<contenuto.headerRighe.length;i++){
 			if(contenuto.headerRighe[i].equals(HeaderRiga.EPSG)){
 				indiceEpsg = i;
@@ -500,7 +501,7 @@ public class ControllerTabella {
 		System.out.println("indiceX:"+indiceX);
 		System.out.println("indiceY:"+indiceY);
 		System.out.println("indiceLatitudine:"+indiceLatitudine);
-		System.out.println("indiceLongitudine:"+indiceLongitudine);		
+		System.out.println("indiceLongitudine:"+indiceLongitudine);
 		if(indiceEpsg==-1){
 			gm.addMessaggio(new MessaggioErrore(-1, -1, MessaggioErrore.GeneratoreErrore.CONVERSIONE_COORDINATE, "Manca riga codice EPSG", Level.SEVERE));
 			errori = true;
@@ -531,7 +532,7 @@ public class ControllerTabella {
 				SimpleBotanicalData risposta;
 				try {
 					risposta = Stato.comunicatore.conversioneCoordinate(
-							contenuto.dati[indiceEpsg][iColonna].dato.toString(), 
+							contenuto.dati[indiceEpsg][iColonna].dato.toString(),
 							contenuto.dati[indiceX][iColonna].dato.toString(),
 							contenuto.dati[indiceY][iColonna].dato.toString());
 					if(risposta.getPlaceSize()==1){
@@ -540,20 +541,20 @@ public class ControllerTabella {
 					}else{
 						gm.addMessaggio(new MessaggioErrore(iColonna, -1, MessaggioErrore.GeneratoreErrore.CONVERSIONE_COORDINATE, "coordinate non convertibili", Level.SEVERE));
 					}
-				} catch (SAXException | IOException e) {
+				} catch (SAXException | IOException | InterruptedException | URISyntaxException e) {
 					gm.addMessaggio(new MessaggioErrore(iColonna, -1, MessaggioErrore.GeneratoreErrore.CONVERSIONE_COORDINATE, "coordinate non convertibili", Level.SEVERE));
 					e.printStackTrace();
 				}
 			}
 		}
 	}
-	
+
 	public static void convertiDate(ContenutoTabella contenuto, GestoreMessaggi gm){
 		String path;
 		String originale;
 		String parti[];
 		String nuovo;
-		
+
 		for(int iRiga=0; iRiga<contenuto.headerRighe.length;iRiga++){
 			path = contenuto.headerRighe[iRiga].getPath();
 			if(path.equals("Date")){
@@ -578,13 +579,13 @@ public class ControllerTabella {
 			}
 		}
 	}
-	
+
 	public static void convertiEsposizione(ContenutoTabella contenuto, GestoreMessaggi gm){
 		String path;
 		String originale;
 		String nuovo;
 		ConvertitoreEsposizione ce = new ConvertitoreEsposizione();
-		
+
 		for(int iRiga=0; iRiga<contenuto.headerRighe.length;iRiga++){
 			path = contenuto.headerRighe[iRiga].getPath();
 			if(path.equals("Place.Exposition")){
@@ -609,13 +610,13 @@ public class ControllerTabella {
 			}
 		}
 	}
-	
+
 	public static void convertiInclinazione(ContenutoTabella contenuto, GestoreMessaggi gm){
 		String path;
 		String originale;
 		String nuovo;
 		ConvertitoreInclinazione ci = new ConvertitoreInclinazione();
-		
+
 		for(int iRiga=0; iRiga<contenuto.headerRighe.length;iRiga++){
 			path = contenuto.headerRighe[iRiga].getPath();
 			if(path.equals("Place.Inclination")){
@@ -644,15 +645,15 @@ public class ControllerTabella {
 			}
 		}
 	}
-	
+
 	public static void correggiCoordinate(ContenutoTabella contenuto, GestoreMessaggi gm){
 		String path;
 		String originale;
 		String nuovo;
-		
+
 		ConvertitoreLatitudine convertitoreLatitudine = new ConvertitoreLatitudine();
 		ConvertitoreLongitudine convertitoreLongitudine = new ConvertitoreLongitudine();
-		
+
 		for(int iRiga=0; iRiga<contenuto.headerRighe.length;iRiga++){
 			path = contenuto.headerRighe[iRiga].getPath();
 			if(path.equals("Place.Latitude")){
@@ -693,7 +694,7 @@ public class ControllerTabella {
 			}
 		}
 	}
-	
+
 	public static void annotaSpecie(ContenutoTabella contenuto, GestoreMessaggi gm){
 		int iDefinizioni = contenuto.getColonnaPerTipo(HeaderColonna.DEFINIZIONI);
 		if(iDefinizioni==-1){
@@ -720,7 +721,7 @@ public class ControllerTabella {
 			}
 		}
 	}
-	
+
 	/************************************************************************
 	 * Invia i rilievi al server
 	 * @param contenuto tabella dei dati
@@ -728,13 +729,13 @@ public class ControllerTabella {
 	 * @param sa la scala di abbondanza
 	 * @param simulazione se true i dati vengono inviati come simulazione
 	 ***********************************************************************/
-	public static SimpleBotanicalData[] invioAlServerRichiesta(ContenutoTabella contenuto, 
+	public static SimpleBotanicalData[] invioAlServerRichiesta(ContenutoTabella contenuto,
 			String modelloStrati, ScalaSample sa, boolean simulazione){
 		int iColonna;
 		Sample rilievo;
 		SimpleBotanicalData risposte[] = new SimpleBotanicalData[contenuto.headerColonne.length];
 		Message messaggio;
-		
+
 		for(iColonna=0; iColonna<contenuto.headerColonne.length; iColonna++){
 			if(contenuto.headerColonne[iColonna].equals(HeaderColonna.RILIEVO)){
 				try {
@@ -759,6 +760,12 @@ public class ControllerTabella {
 					messaggio.setType(MessageType.ERROR);
 					messaggio.addText(new Text("it",e.getMessage()));
 					risposte[iColonna].addMessage(messaggio);
+				} catch (InterruptedException | URISyntaxException e) {
+					risposte[iColonna] = new SimpleBotanicalData();
+					messaggio = new Message();
+					messaggio.setType(MessageType.ERROR);
+					messaggio.addText(new Text("it",e.getMessage()));
+					risposte[iColonna].addMessage(messaggio);
 				}
 			}else{
 				risposte[iColonna] = null; // inutile per via dell'inizializzazione degli array ma così è più esplicito
@@ -766,7 +773,7 @@ public class ControllerTabella {
 		}
 		return risposte;
 	}
-	
+
 	/************************************************************************
 	 * Controlla le risposte del server sull'invio dei rilievi
 	 * @param contenuto tabella dei dati
@@ -775,19 +782,19 @@ public class ControllerTabella {
 	 ***********************************************************************/
 	public static void invioAlServerElaboraRisposta(ContenutoTabella contenuto, SimpleBotanicalData[] rispostaServer, GestoreMessaggi gm){
 		int iRisposta;
-		
+
 		ErrorLevelManager managerLivelli = new ErrorLevelManager();
-		// managerLivelli.associaCodiceLivello("1011", Level.WARNING); 
+		// managerLivelli.associaCodiceLivello("1011", Level.WARNING);
 		gm.rimuoviSelettivo(GeneratoreErrore.INVIO_RILIEVI);
-		
+
 		for(iRisposta=0; iRisposta<contenuto.headerColonne.length; iRisposta++){
 			// può succedere che la risposta sia null se per esempio la colonna
 			// non contiene un rilievo
 			if(rispostaServer[iRisposta]!=null){
 				for(Message m: rispostaServer[iRisposta].getMessage()){
 					gm.addMessaggio(new MessaggioErrore(
-							-1, 
-							iRisposta, 
+							-1,
+							iRisposta,
 							GeneratoreErrore.INVIO_RILIEVI,
 							m.toString(),
 							managerLivelli.calcolaLivelloMessaggio(m)
@@ -806,10 +813,10 @@ public class ControllerTabella {
 			}
 		}
 	}
-	
+
 	/************************************************************************
 	 * Serve per contare quante presenze sono imputabili ad una scala
-	 * 
+	 *
 	 * @author Edoardo Panfili, studio Aspix
 	 ***********************************************************************/
 	private static class ScalaPresenze implements Comparable<ScalaPresenze>{
@@ -827,7 +834,7 @@ public class ControllerTabella {
 			preferenzeScale.put("braun-blanquet-ab",5);
 			preferenzeScale.put("braun-blanquet-mab",0); // devi sprofondare!
 		}
-		
+
 		@Override
 		public int compareTo(ScalaPresenze o) {
 			if(this.scala.equals("none") && o.scala.getNome().equals("non")){
@@ -849,7 +856,7 @@ public class ControllerTabella {
 			return o.presenze-this.presenze;
 		}
 	}
-	
+
 	/************************************************************************
 	 * @param s il rilievo in cui cercare
 	 * @param id l'id dello strato

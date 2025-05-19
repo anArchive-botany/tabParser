@@ -15,8 +15,7 @@
   </properties>
 
   <dependencies>
-        <!-- INIZIO dipendenze generali archiver -->
-        <dependency>
+        <!-- INIZIO dipendenze generali archiver MAGARI DA TOGLIERE ? 
             <groupId>it.aspix</groupId>
             <artifactId>simpleBotanicalData</artifactId>
             <version>[6.2,)</version>
@@ -34,19 +33,28 @@
             <version>4.5.10</version>
             <scope>compile</scope>
         </dependency>
-        <!-- FINE dipendenze generali archiver -->
-        
+         FINE dipendenze generali archiver -->
+
+        <dependency>
+            <groupId>it.aspix</groupId>
+            <artifactId>archiver</artifactId>
+            <version>[5,)</version>
+            <scope>compile</scope>
+        </dependency>
+
         <dependency>
             <groupId>org.apache.poi</groupId>
             <artifactId>poi-ooxml</artifactId>
+            <!-- https://central.sonatype.com/artifact/org.apache.poi/poi-ooxml -->
+            <!-- esiste versione 5.1 -->
             <version>4.1.1</version>
             <scope>compile</scope>
         </dependency>
-        
+
         <dependency>
             <groupId>org.apache.odftoolkit</groupId>
             <artifactId>simple-odf</artifactId>
-            <version>0.8.2-incubating</version>
+            <version>0.8.2-incubating</version> <!-- ultimo aggiornamento 2017-03-28 -->
             <exclusions>
                 <exclusion> <!-- ?? forse un bug nelle dipendenze di simple-odf ? -->
                     <groupId>com.sun</groupId>
@@ -57,13 +65,17 @@
                     <artifactId>xml-apis</artifactId>
                 </exclusion>
             </exclusions>
-        </dependency>    
-         
-        
+        </dependency>
+
         <!-- 
         le due dipendenze sotto non riesco a spostarle sul repository di maven perché c'è soltanto una beta
         /opt/maven/bin/mvn install:install-file -Dfile=simple-odf-0.8.1-incubating.jar -DgroupId=simple-odf -DartifactId=simple-odf -Dversion=0.8.1 -Dpackaging=jar -DgeneratedPom=true
         /opt/maven/bin/mvn install:install-file -Dfile=odfdom-java-0.8.10-incubating.jar -DgroupId=odfdom -DartifactId=odfdom -Dversion=0.8.1 -Dpackaging=jar -DgeneratedPom=true 
+        
+        https://tdf.github.io/odftoolkit/downloads.html
+        ultimo aggiornamento 2023-12-21
+        https://central.sonatype.com/artifact/org.odftoolkit/odfdom-java/versions
+        
         -->
         <!-- 
         <dependency>

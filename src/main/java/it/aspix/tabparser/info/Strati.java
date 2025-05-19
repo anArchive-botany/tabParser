@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright 2014 studio Aspix 
+ * Copyright 2014 studio Aspix
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -11,14 +11,14 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License. 
+ * limitations under the License.
  ***************************************************************************/
 package it.aspix.tabparser.info;
 
 import it.aspix.tabparser.tabella.ContenutoTabella;
 import it.aspix.archiver.CostruttoreOggetti;
-import it.aspix.sbd.InformazioniTipiEnumerati;
-import it.aspix.sbd.ValoreEnumeratoDescritto;
+import it.aspix.sbd.introspection.InformazioniTipiEnumerati;
+import it.aspix.sbd.introspection.ValoreEnumeratoDescritto;
 import it.aspix.sbd.obj.Level;
 import it.aspix.sbd.obj.Sample;
 
@@ -32,16 +32,16 @@ import javax.swing.JScrollPane;
 
 /****************************************************************************
  * Informazioni descrittive del sistema degli strati
- * 
+ *
  * @author Edoardo Panfili, studio Aspix
  ***************************************************************************/
 public class Strati extends JPanel implements InfoPanel{
-	
+
 	private static final long serialVersionUID = 1L;
 
 	public Strati(){
 		super();
-		ArrayList<ValoreEnumeratoDescritto> valoriStratificazione = InformazioniTipiEnumerati.getElementiDescritti("modelOfTheLevels","it");
+		ArrayList<ValoreEnumeratoDescritto> valoriStratificazione = InformazioniTipiEnumerati.getValoriDescritti("Cell.ModelOfTheLevels","it");
 		StringBuilder sb = new StringBuilder();
 		sb.append("<html><body>");
 		sb.append("<p>il codice da inserire come strato è il numero sulla sinistra</p>");
@@ -59,14 +59,14 @@ public class Strati extends JPanel implements InfoPanel{
 		this.setLayout(new BorderLayout());
 		this.add(sp, BorderLayout.CENTER);
 	}
-	
+
 	public JPanel getPannello(){
 		return this;
 	}
 
 	@Override
 	public void setValore(ContenutoTabella ct, int riga, int colonna) {
-		// non serve a 
+		// non serve a
 	}
 
 	@Override
