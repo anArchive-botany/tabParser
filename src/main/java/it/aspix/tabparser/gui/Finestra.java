@@ -113,7 +113,7 @@ public class Finestra extends JFrame implements GestoreMessaggi{
 	private static HashMap<Boolean, Color>coloreEvidenziato = new HashMap<>();
 	private static HashMap<Boolean, Color>coloreIcona = new HashMap<>();
 	{
-		coloreBase.put(true, new Color(255,120,0) ); // modifica i dati
+		coloreBase.put(true, new Color(240, 148, 86) ); // modifica i dati
 		coloreBase.put(false, new Color(154,191,65) ); // NON modifica i dati
 
 		coloreEvidenziato.put(true, new Color(255,24,0) ); // modifica i dati
@@ -858,7 +858,7 @@ public class Finestra extends JFrame implements GestoreMessaggi{
 		JLabel jb = new JLabel();
 
 		// apparenza
-		jb.setFont(new Font("Arial", Font.PLAIN, 12));
+		jb.setFont(new Font("Arial", Font.PLAIN, 13));
 		jb.setOpaque(true);
 		jb.setBorder(BorderFactory.createCompoundBorder(
 				BorderFactory.createLineBorder(coloreEvidenziato.get(modificaDati), 1, true),
@@ -869,7 +869,8 @@ public class Finestra extends JFrame implements GestoreMessaggi{
 		String nomeFile = "icone/"+r1+(r2==null?"": " "+r2)+".png";
 		URL risorsa = Finestra.class.getResource(nomeFile);
 		if(risorsa!=null){
-			ImageIcon ii = doAlpha(new ImageIcon(risorsa), coloreIcona.get(modificaDati));
+			ImageIcon ii = new ImageIcon(risorsa);
+			// ImageIcon ii = doAlpha(new ImageIcon(risorsa), coloreIcona.get(modificaDati));
 			jb.setIcon(ii);
 		}
 		// imposto il testo in modo che vada a capo

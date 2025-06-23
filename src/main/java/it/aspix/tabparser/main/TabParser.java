@@ -113,33 +113,10 @@ public class TabParser {
             attesaApertura.setAvanzamento("Avvio completato",5);
             attesaApertura.setVisible(false);
             attesaApertura.dispose();
-
-
 		}
-		// XXX: evito il log di tutti i messaggi
-		Proprieta.aggiorna("devel.sbdLogEnabled", "false");
 		Finestra cs = new Finestra();
 		UtilitaGui.centraDialogoAlloSchermo(cs, UtilitaGui.CENTRO);
 		cs.setVisible(true);
-	}
-
-	public static String getHostName(){
-		String host = "unknown";
-		try {
-			Process p;
-			p = Runtime.getRuntime().exec("hostname");
-			InputStream is = p.getInputStream();
-			InputStreamReader isr = new InputStreamReader(is);
-			char nome[] = new char[80];
-			isr.read(nome);
-			isr.close();
-			is.close();
-			host = new String(nome);
-		} catch (IOException e) {
-			// in questo caso non serv e comunicare nulla all'utente
-			e.printStackTrace();
-		}
-		return host.trim();
 	}
 
 }
