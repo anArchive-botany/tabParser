@@ -1,0 +1,7 @@
+come editor pare funzionar bene inkscape
+
+ogni icona occupa uno spazio 32x32 e sullo sfondo c'è un quadrato
+di quella dimensione
+
+per esportare le singole icone bisogna selezionare tutto, quadrato
+trasparente compreso in modo che venga una immagine 32x32 
